@@ -5,7 +5,10 @@ import ApiFunc from './apiFunctions.js';
 import users from './users.js';
 import modifyRoomObjects from './modifyRoomObjects.js';
 import handleServerStats from './handleServerStats.js';
+import notifications from './notify.js';
 
+
+let oldNotifications = []
 const client = graphite.createClient('plaintext://relay:2003/');
 
 const { combine, timestamp, prettyPrint } = format;
@@ -31,11 +34,13 @@ class ManageStats {
   async handleUsers(type) {
     const getStatsFunctions = [];
     users.forEach((user) => {
+      console.log("user: " + user.username);
       try {
         const shouldContinue = new Date().getMinutes() % user.shards.length !== 0;
         if (user.type === 'mmo' && shouldContinue) return;
         for (let y = 0; y < user.shards.length; y += 1) {
           const shard = user.shards[y];
+          console.log("shard: " + shard);
           getStatsFunctions.push(this.getStats(user, shard, this.message));
         }
       } catch (error) {
@@ -95,7 +100,7 @@ class ManageStats {
   async getStats(userinfo, shard) {
     try {
       await ManageStats.getLoginInfo(userinfo);
-      const stats = await ApiFunc.getMemory(userinfo, shard);
+      const stats = await ApiFunc.getMemory(userinfo, shard, '');
       await this.processStats(userinfo, shard, stats);
       return 'success';
     } catch (error) {
@@ -107,6 +112,8 @@ class ManageStats {
     const me = await ApiFunc.getUserinfo(userinfo);
     if (!me || me.error) stats.power = me.power || 0;
     stats.leaderboard = await ManageStats.addLeaderboardData(userinfo);
+    notifications(userinfo, stats.notifications);
+
     this.pushStats(userinfo, stats, shard);
   }
 
@@ -124,6 +131,7 @@ class ManageStats {
   pushStats(userinfo, stats, shard) {
     this.groupedStats[userinfo.username] = userinfo.type === 'mmo' ? { [shard]: stats } : { shard: stats };
     this.message += `${userinfo.type}: Added stats object for ${userinfo.username} in ${shard}\r\n`;
+
   }
 }
 
@@ -135,7 +143,7 @@ const groupedUsers = users.reduce((group, user) => {
   return group;
 }, {});
 
-cron.schedule('*/30 * * * * *', async () => {
+cron.schedule('* * * * *', async () => {
   console.log('\r\nCron event hit: ', new Date());
   if (groupedUsers.private) new ManageStats(groupedUsers.private).handleUsers('private');
   if (groupedUsers.mmo) new ManageStats(groupedUsers.mmo).handleUsers('mmo');

@@ -9,6 +9,7 @@
         "dotenv": "^16.0.2",
         "graphite": "^0.1.4",
         "node-cron": "^3.0.1",
+        "node-fetch": "^3.2.10",
         "node-powershell": "^5.0.1",
         "uuid": "^8.3.2",
         "winston": "^3.8.1"

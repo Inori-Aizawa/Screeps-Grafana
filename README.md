@@ -1,3 +1,7 @@
+# what is this?
+
+this is [screeps-grafana](https://socket.dev/npm/package/screeps-grafana) with [screeps-notifications](https://github.com/marceltransier/screeps-notifications) but instead of telegram i use gotify
+
 # An service to launch an easy to use high performant graphite + grafana service
 
 ## Requirements
@@ -9,7 +13,16 @@
 
 ### Setup
 
-1. Check out `src/users.js` for setup instructions
+1. copy users.js.example to users.js
+2. folow the instructions in users.js
+
+### setup screeps
+
+1. in the screeps-notifications folder move notifications.js to your screeps folder
+2. import the notifications.js file in your main.js
+3. you can now execute it with Notifications.add('title','body')
+4. you could also overide console.notify so you can use that instead of notifications.add. look in the example.main.js for an example
+
 
 ### Running
 
@@ -24,6 +37,8 @@ Run commands to get other dashboards:
 
 1. `npm run start-mmo` For International mmo dashboard.
 2. `npm run start-private` To get performance server dashboards.
+
+
 
 ## Usage
 

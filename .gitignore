@@ -1,7 +1,10 @@
 # Files
 api.log
 push.log
+docker-compose.yml.own
+src/users.js
 
 # Folders
 node_modules
 whisper
+
